@@ -53,8 +53,43 @@ const getUsers = async (req, res) => {
     }
 };
 
+const userLogin = async (req, res) => {
+    try {
+        const {
+            email,
+            password
+        } = req.body;
+
+        const user = await userModel.findOne({
+            email: email
+        });
+
+        if (user) {
+            bcrypt.compare(password, user.password, async (err, result) => {
+
+                //apply De_morgan law
+                if (!!result === true) {
+                    res.status(200).json({
+                        message: 'valid user'
+                    });
+                } else {
+                    res.status(404).json({
+                        message: 'Password incorrect'
+                    });
+                }
+            });
+        } else {
+            res.status(404).json({
+                message: "Not valid user"
+            });
+        }
+    } catch (error) {
+        res.status(404).send(error.message);
+    }
+}
 
 module.exports = {
     createUser,
     getUsers,
+    userLogin,
 }
